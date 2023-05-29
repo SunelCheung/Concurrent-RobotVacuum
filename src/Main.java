@@ -109,16 +109,13 @@ class Robot implements Runnable {
                 return false;
             
             cell = room.cells[x][y];
-            cell.lock.readLock().lock();
 
+            cell.lock.writeLock().lock();
             // Check for collisions
             if (room.cells[x][y].robot != null) {
                 System.out.println("COLLISION AT CELL (" + x + "," + y + ")");
                 System.exit(0);
             }
-
-            cell.lock.readLock().unlock();
-            cell.lock.writeLock().lock();
             // Place the robot in the new cell
             room.cells[x][y].robot = this;
             cell.lock.writeLock().unlock();
