@@ -97,17 +97,16 @@ class Robot implements Runnable {
 //            System.out.println(Thread.currentThread().threadId()+ "step vector (" + stepVector[direction].x + ";" + stepVector[direction].y + ")");
             x += stepVector[direction].x;
             y += stepVector[direction].y;
+
+            cell.lock.writeLock().lock();
+            // Clean the current cell
+            cell.isClean = true;
+            // Remove the robot from the current cell
+            cell.robot = null;
+            cell.lock.writeLock().unlock();
+
             if (x > room.maxX || y > room.maxY || x < room.minX || y < room.minY)
                 return false;
-            else
-            {
-                cell.lock.writeLock().lock();
-                // Clean the current cell
-                cell.isClean = true;
-                // Remove the robot from the current cell
-                cell.robot = null;
-                cell.lock.writeLock().unlock();
-            }
             
             cell = room.cells[x][y];
             cell.lock.readLock().lock();
@@ -132,17 +131,10 @@ class Robot implements Runnable {
         int step = 0;
         isRunning = true;
         while (true) {
-            if (!stepRun(direction++, ++step)) {
-                break;
-            }
-            if (!stepRun(direction++, step)) {
-                break;
-            }
-
-            if (!stepRun(direction++, ++step)) {
-                break;
-            }
-            if (!stepRun(direction++, step)) {
+            if (!stepRun(direction++, ++step) ||
+                    !stepRun(direction++, step) ||
+                    !stepRun(direction++, ++step) ||
+                    !stepRun(direction++, step)) {
                 break;
             }
         }
@@ -151,7 +143,7 @@ class Robot implements Runnable {
 }
 
 class Simulation {
-    public static final int SLEEP_TIME = 1000;
+    public static final int SLEEP_TIME = 2000;
 
     List<Robot> robots;
     Room room;
