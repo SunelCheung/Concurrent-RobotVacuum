@@ -33,7 +33,7 @@ class Room {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int y = minY; y <= maxY; y++) {
+        for (int y = maxY; y >= minY; y--) {
             for (int x = minX; x <= maxX; x++) {
                 Cell cell = cells[x - minX][y - minY];
                 if (cell.robot != null) {
@@ -70,7 +70,16 @@ class Robot implements Runnable {
             case 'R' -> this.direction = 3;
         }
         this.room = room;
-        room.cells[x][y].robot = this;
+        Cell cell = room.cells[x][y];
+        cell.lock.writeLock().lock();
+        if(cell.robot != null)
+        {
+            throw new IllegalArgumentException("Robot already exists in cell (" + x + "," + y + ")");
+        }
+        else {
+            cell.robot = this;
+        }
+        cell.lock.writeLock().unlock();
     }
 
     private boolean stepRun(int direction, int step) {
@@ -85,6 +94,7 @@ class Robot implements Runnable {
             }
 
             Cell cell = room.cells[x][y];
+//            System.out.println(Thread.currentThread().threadId()+ "step vector (" + stepVector[direction].x + ";" + stepVector[direction].y + ")");
             x += stepVector[direction].x;
             y += stepVector[direction].y;
             if (x > room.maxX || y > room.maxY || x < room.minX || y < room.minY)
@@ -104,7 +114,7 @@ class Robot implements Runnable {
 
             // Check for collisions
             if (room.cells[x][y].robot != null) {
-                System.out.println("COLLISION AT CELL (" + x + ";" + y + ")");
+                System.out.println("COLLISION AT CELL (" + x + "," + y + ")");
                 System.exit(0);
             }
 
@@ -122,17 +132,14 @@ class Robot implements Runnable {
         int step = 0;
         isRunning = true;
         while (true) {
-            step++;
-
-            if (!stepRun(direction++, step)) {
+            if (!stepRun(direction++, ++step)) {
                 break;
             }
             if (!stepRun(direction++, step)) {
                 break;
             }
 
-            step++;
-            if (!stepRun(direction++, step)) {
+            if (!stepRun(direction++, ++step)) {
                 break;
             }
             if (!stepRun(direction++, step)) {
@@ -195,48 +202,52 @@ class Simulation {
 
 public class Main {
     public static void main(String[] args) {
-        // 读取房间大小
-        int roomSize = readRoomSize("room.txt");
+        try {
 
-        // 创建房间
-        Room room = new Room(roomSize);
+            // 读取房间大小
+            int roomSize = readRoomSize("room.txt");
+            // 创建房间
+            Room room = new Room(roomSize);
+            // 读取机器人的详细信息
+            List<Robot> robots = readRobots("robots.txt", room);
 
-        // 读取机器人的详细信息
-        List<Robot> robots = readRobots("robots.txt", room);
+            // 创建模拟
+            Simulation simulation = new Simulation(room, robots);
 
-        // 创建模拟
-        Simulation simulation = new Simulation(room, robots);
-
-        // 启动模拟
-        simulation.start();
-    }
-
-    private static int readRoomSize(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            return Integer.parseInt(reader.readLine());
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading room size", e);
+            // 启动模拟
+            simulation.start();
         }
-    }
-
-    private static List<Robot> readRobots(String filename, Room room) {
-        List<Robot> robots = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            int numRobots = Integer.parseInt(reader.readLine());
-
-            for (int i = 0; i < numRobots; i++) {
-                String[] parts = reader.readLine().split(" ");
-                int x = Integer.parseInt(parts[0]);
-                int y = Integer.parseInt(parts[1]);
-                char direction = parts[2].charAt(0);
-
-                robots.add(new Robot(x, y, direction, room));
+        catch (Exception e){
+            switch (e.getClass().getSimpleName()) {
+                case "IOException", "IllegalArgumentException" -> {
+                    System.out.println("INPUT ERROR");
+                    System.exit(0);
+                }
+                default -> {
+                }
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading robots", e);
         }
+    }
 
+    private static int readRoomSize(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+            return Integer.parseInt(reader.readLine());
+    }
+
+    private static List<Robot> readRobots(String filename, Room room) throws Exception {
+        List<Robot> robots = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        int numRobots = Integer.parseInt(reader.readLine());
+
+         for (int i = 0; i < numRobots; i++) {
+             String[] parts = reader.readLine().split(" ");
+             int x = Integer.parseInt(parts[0]);
+             int y = Integer.parseInt(parts[1]);
+             char direction = parts[2].charAt(0);
+
+             robots.add(new Robot(x, y, direction, room));
+
+        }
         return robots;
     }
 }
