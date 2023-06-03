@@ -1,0 +1,6 @@
+Group member:
+Ziye Zhang(202290251), Wei Wang(202290844)
+
+This is a standard Java project, you can consult the source code at src/Main.java, or run the program at out/production/RobotVacuum/Main.class.
+If you want to check the room status, you can modify the "showRoomStatus" parameter passed in the "simulation.start" method.
+And there are two sets of config named cleanConfig and collisionConfig, entering the folder and copy robots.txt and room.txt to parent directory can switch between them.
