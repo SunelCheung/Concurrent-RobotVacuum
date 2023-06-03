@@ -35,4 +35,17 @@ class Room {
         }
         return sb.toString();
     }
+
+    boolean checkClean(){
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                Cell cell = cells[x][y];
+                if (!cell.isClean) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
 }

@@ -1,10 +1,9 @@
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 class Cell {
     boolean isClean;
     Robot robot;
-
-    ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    ReentrantLock lock = new ReentrantLock();
     Cell() {
         isClean = false;
         robot = null;

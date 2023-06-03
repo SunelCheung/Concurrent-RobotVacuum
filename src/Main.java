@@ -4,28 +4,25 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        int roomSize;
+        Room room = null;
+        List<Robot> robots = null;
         try {
-            // 读取房间大小
-            int roomSize = readRoomSize("room.txt");
-            // 创建房间
-            Room room = new Room(roomSize);
-            // 读取机器人的详细信息
-            List<Robot> robots = readRobots("robots.txt", room);
-            // 创建模拟
-            Simulation simulation = new Simulation(room, robots);
-
-            // 启动模拟
-            simulation.start(true);
+            roomSize = readRoomSize("room.txt");
+            room = new Room(roomSize);
+            robots = readRobots("robots.txt", room);
         }
         catch (Exception e){
-            switch (e.getClass().getSimpleName()) {
-                case "IOException", "IllegalArgumentException" -> {
-                    System.out.println("INPUT ERROR");
-                    System.exit(0);
-                }
-                default -> {
-                }
-            }
+            System.out.println("INPUT ERROR");
+            System.exit(-1);
+        }
+
+        try {
+            new Simulation(room, robots).start(true);
+        }
+        catch (Exception e){
+            System.out.println(e);
+            System.exit(-1);
         }
     }
 

@@ -16,34 +16,26 @@ class Simulation {
             new Thread(robot).start();
         }
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(SLEEP_TIME/10);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         while (true) {
-            boolean allClean = true;
-            for (int x = room.minX; x <= room.maxX; x++) {
-                for (int y = room.minY; y <= room.maxY; y++) {
-                    Cell cell = room.cells[x][y];
-                    if (!cell.isClean) {
-                        allClean = false;
-                        break;
-                    }
-                }
-                if (!allClean) {
-                    break;
-                }
+            try {
+                Thread.sleep(SLEEP_TIME/2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            if (allClean) {
+            if(showRoomStatus)
+                System.out.println(room);
+            if (room.checkClean()) {
                 System.out.println("ROOM CLEAN");
                 System.exit(0);
             }
             try {
-                if(showRoomStatus)
-                    System.out.println(room);
-                Thread.sleep(SLEEP_TIME);
+                Thread.sleep(SLEEP_TIME/2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
