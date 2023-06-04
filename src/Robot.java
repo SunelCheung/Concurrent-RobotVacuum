@@ -1,7 +1,11 @@
 import java.awt.*;
 
 class Robot implements Runnable {
-    static Point[] stepVector = {new Point(0, 1), new Point(-1, 0), new Point(0, -1), new Point(1, 0)};
+    static Point[] stepVector = {
+            new Point(0, 1),
+            new Point(-1, 0),
+            new Point(0, -1),
+            new Point(1, 0)};
     int x, y;
     int direction;
     Room room;
@@ -30,58 +34,9 @@ class Robot implements Runnable {
     }
 
     private boolean stepRun(int direction, int step) {
-        // TO BE VERIFIED
-//        direction %= 4;
-//        for (int k = 0; k < step; k++) {
-//            Cell cell = room.cells[x][y];
-//
-////            System.out.println(Thread.currentThread().threadId()+ "step vector (" + stepVector[direction].x + ";" + stepVector[direction].y + ")");
-//            x += stepVector[direction].x;
-//            y += stepVector[direction].y;
-//
-//            cell.lock.lock();
-//            // Clean the current cell
-//            cell.isClean = true;
-//            // Remove the robot from the current cell
-//            cell.lock.unlock();
-//
-//            // hit a wall
-//            if (x > room.maxX || y > room.maxY || x < room.minX || y < room.minY){
-//                x -= stepVector[direction].x;
-//                y -= stepVector[direction].y;
-//                return false;
-//            }
-//
-//            // Sleep for 2 seconds to simulate the time it takes to clean a cell
-//            try {
-//                Thread.sleep(Simulation.SLEEP_TIME);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//
-//            cell.lock.lock();
-//            cell.robot = null;
-//            cell.lock.unlock();
-//
-//            Cell nextCell = room.cells[x][y];
-//            nextCell.lock.lock();
-//
-//            // Check for collisions
-//            if (nextCell.robot != null) {
-//                System.out.println("COLLISION AT CELL (" + x + "," + y + ")");
-//                System.exit(0);
-//            }
-//            // Place the robot in the new cell
-//            nextCell.robot = this;
-//
-//            nextCell.lock.unlock();
-//        }
-//        return true;
-
         direction %= 4;
         for (int k = 0; k < step; k++) {
             Cell cell = room.cells[x][y];
-//            System.out.println(Thread.currentThread().threadId()+ "step vector (" + stepVector[direction].x + ";" + stepVector[direction].y + ")");
             x += stepVector[direction].x;
             y += stepVector[direction].y;
 
@@ -94,8 +49,10 @@ class Robot implements Runnable {
 
             cell.lock.lock();
             // Clean the current cell
-            cell.isClean = true;
+            room.clean(cell);
             // Remove the robot from the current cell
+            if(room.checkClean())
+                return false;
             cell.robot = null;
             cell.lock.unlock();
 
@@ -133,9 +90,11 @@ class Robot implements Runnable {
         }
 
         while (true) {
-//          If a robot is at the boundary of the room and about to hit a wall,
-//          then it should turn counterclockwise and continue travelling counterclockwise
-//          along the walls of the room in a circular loop, and no longer a spiral pattern.
+            /*
+          If a robot is at the boundary of the room and about to hit a wall,
+          then it should turn counterclockwise and continue travelling counterclockwise
+          along the walls of the room in a circular loop, and no longer a spiral pattern.
+             */
             if (!stepRun(direction++, ++step)) {
                 step = room.size;
             }
