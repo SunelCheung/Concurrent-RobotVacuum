@@ -16,24 +16,13 @@ class Simulation {
             new Thread(robot).start();
         }
 
-//        try {
-//            Thread.sleep(SLEEP_TIME/10);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-        while (true) {
+        while (showRoomStatus) {
             try {
                 Thread.sleep(SLEEP_TIME/2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(showRoomStatus)
-                System.out.println(room);
-            if (room.checkClean()) {
-                System.out.println("ROOM CLEAN");
-                System.exit(0);
-            }
+            System.out.println(room);
             try {
                 Thread.sleep(SLEEP_TIME/2);
             } catch (InterruptedException e) {

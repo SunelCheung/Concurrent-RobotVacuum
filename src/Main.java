@@ -18,7 +18,7 @@ public class Main {
         }
 
         try {
-            new Simulation(room, robots).start(true);
+            new Simulation(room, robots).start(false);
         }
         catch (Exception e){
             System.out.println(e);
